@@ -1,0 +1,36 @@
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-ppc64el
+
+if [ -d $JAVA_HOME ]; then
+    echo "$JAVA_HOME exists"
+else 
+    echo "$JAVA_HOME does not exist - exiting"
+    exit
+fi
+
+mkdir -p target/build/libuiohook/
+cmake -B target/build/libuiohook/ -S src/external/libuiohook/ \
+-G "Unix Makefiles" \
+-D CMAKE_INSTALL_PREFIX=target/ \
+-D CMAKE_VERBOSE_MAKEFILE=ON \
+-D BUILD_SHARED_LIBS=OFF \
+-D USE_EPOCH_TIME=ON  
+
+cmake --build target/build/libuiohook/ \
+--parallel 2 \
+--clean-first
+
+cmake --install target/build/libuiohook/
+
+mkdir -p target/build/jni/
+cmake -B target/build/jni/ \
+-G "Unix Makefiles" \
+-D CMAKE_PREFIX_PATH=target/ \
+-D CMAKE_SYSTEM_NAME=linux \
+-D CMAKE_SYSTEM_PROCESSOR=ppc64el \
+-D CMAKE_VERBOSE_MAKEFILE=ON
+
+cmake --build target/build/jni/ \
+--parallel 2 \
+--clean-first
+
+cmake --install target/build/jni/
